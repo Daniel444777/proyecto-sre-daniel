@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    image: daniel444777/api-sre-daniel:latest
+    container_name: api_sre_app
+    restart: always
+    environment:
+      DB_HOST: servidor-bd-ejemplo
+      DB_USER: root
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: sre_db
+    ports:
+      - "5050:5050"
+    networks:
+      - sre_network
+
+  db:
+    image: mysql:8.0
+    container_name: servidor-bd-ejemplo
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: sre_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - sre_network
+
+  nginx-proxy-manager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginx_proxy_manager
+    restart: always
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+    networks:
+      - sre_network
+
+networks:
+  sre_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
