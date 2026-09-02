@@ -27,9 +27,45 @@ jobs:
       - name: Ejecutar pruebas
         run: pytest -v
 
+  bandit-scan:
+    name: SAST - Bandit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar Bandit
+        run: pip install bandit
+
+      - name: Ejecutar Bandit
+        run: bandit -r . -x ./tests,./venv -ll -ii
+
+  trivy-scan:
+    name: Container Scan - Trivy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Build imagen local para escaneo
+        run: docker build -t api-sre-daniel:scan .
+
+      - name: Ejecutar Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'api-sre-daniel:scan'
+          format: 'table'
+          exit-code: '1'
+          severity: 'HIGH,CRITICAL'
+
   deploy:
     name: Build y Despliegue
-    needs: test
+    needs: [test, bandit-scan, trivy-scan]
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
