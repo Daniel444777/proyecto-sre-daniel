@@ -1,0 +1,4 @@
+# Vulnerabilidades en herramientas de build (pip/setuptools vendorizado),
+# no afectan el runtime de la aplicacion Flask. Riesgo aceptado.
+GHSA-6v7p-g79w-8964
+CVE-2025-47273
