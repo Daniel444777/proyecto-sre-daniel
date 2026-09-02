@@ -12,3 +12,4 @@ def client():
 def test_get_root_returns_200(client):
     response = client.get("/")
     assert response.status_code == 200
+    # Trigger pipeline con secrets configurados
